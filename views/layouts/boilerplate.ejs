@@ -15,7 +15,10 @@
     <!-- <h1> This is my travel website </h1> -->
     <%- include("../includes/navbar.ejs") %>
     <br>
-    <div class="container"><%-body%></div>
+    <div class="container">
+        <%- include("../includes/flash.ejs") %>
+    <%-body%>
+    </div>
     <br>
     <%- include("../includes/footer.ejs") %>
 

@@ -33,6 +33,11 @@ router.get("/new",(req,res)=>{
 router.get("/:id",wrapAsync(async (req,res)=>{
     let {id} = req.params;
     const listing = await Listing.findById(id).populate("reviews");
+    if(!listing){
+        req.flash("error"," Listing you requested for does not exist!");
+        return res.redirect("/listings");
+//http://localhost:8080/listings/66ec3261911b2d5f71c30637
+    }
     res.render("listings/show.ejs",{listing});
 }));
 
@@ -63,6 +68,7 @@ router.post("/",validateListing ,wrapAsync(async(req,res,next)=>{
  }
  
          await newListing.save();
+         req.flash("success","New Listing Created!");
    console.log(listing);
          res.redirect("/listings");
      }  catch (err) {
@@ -74,6 +80,11 @@ router.post("/",validateListing ,wrapAsync(async(req,res,next)=>{
 router.get("/:id/edit",wrapAsync(async(req,res)=>{
      let {id} = req.params;
      const listing = await Listing.findById(id);
+    //  http://localhost:8080/listings/66ec3c4f9f7bbba6f7987166/edit
+    if(!listing){
+        req.flash("error"," Listing you requested for does not exist!");
+        return res.redirect("/listings");
+    }
      res.render("listings/edit.ejs",{listing});
  }));
  
@@ -84,6 +95,7 @@ router.put("/:id",validateListing,wrapAsync(async(req,res)=>{
      //   }
      let {id} = req.params;
      await Listing.findByIdAndUpdate(id,{...req.body.listing});
+     req.flash("success"," Listing Updated!");
      res.redirect(`/listings/${id}`);
  }));
  
@@ -92,6 +104,7 @@ router.delete("/:id",wrapAsync(async (req,res)=>{
      let {id} = req.params;
      let deletedListing = await Listing.findByIdAndDelete(id);
      console.log(deletedListing);
+     req.flash("success","Listing Deleted!");
      res.redirect("/listings");
  }));
  
