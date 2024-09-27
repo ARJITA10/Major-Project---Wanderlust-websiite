@@ -11,9 +11,13 @@ const ExpressError = require("./utils/ExpressError.js");
 //const {listingSchema,reviewSchema} = require("./schema.js");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user.js");
 
-const listings = require("./routes/listing.js");
-const reviews = require("./routes/review.js");
+const listingRouter = require("./routes/listing.js");
+const reviewRouter = require("./routes/review.js");
+const userRouter = require("./routes/user.js");
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 main().then(()=>{
@@ -51,6 +55,13 @@ const sessionOptions = {
 //to use session 
 app.use(session(sessionOptions));
 app.use(flash());
+
+//to use/implement passport
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success");
@@ -175,9 +186,17 @@ app.use((req,res,next)=>{
  //     console.log("sample was saved");
  //     res.send("successful testing");
  // });
- 
 
-app.use("/listings",listings);
+// app.get("/demouser",async(req,res)=>{
+//     let fakeUser = new User({
+//         email : "shreyash@gmail.com",
+//         username : "shreyash"
+//     });
+//     const registeredUser = await User.register(fakeUser,"shreyash");
+//     res.send(registeredUser);
+// });
+
+app.use("/listings",listingRouter);
  
 //reviews routes are cut --------------and paste in review.js
 // //Reviews - POST route
@@ -202,7 +221,8 @@ app.use("/listings",listings);
 // })
 // );
 
-app.use("/listings/:id/reviews",reviews);
+app.use("/listings/:id/reviews",reviewRouter);
+app.use("/",userRouter);
 
 app.all("*",(req,res,next)=>{
     next(new ExpressError(404,"Page not found"));
